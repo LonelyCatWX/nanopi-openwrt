@@ -75,7 +75,9 @@ jobs:
           CONFIG_PACKAGE_ddns-scripts_cloudflare.com-v4=y
           CONFIG_PACKAGE_luci-app-adbyby-plus=y
           CONFIG_PACKAGE_luci-app-smartdns=y
+          CONFIG_PACKAGE_luci-app-r2sflasher=y
           CONFIG_PACKAGE_luci-app-ssr-plus=y
+          CONFIG_PACKAGE_luci-app-adguardhome=y
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_DNS2SOCKS=y
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Redsocks2=y
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks=y
@@ -177,6 +179,14 @@ jobs:
           git clone https://github.com/songchenwen/nanopi-r2s
           mv nanopi-r2s/luci-app-r2sflasher/ .
           rm -rf nanopi-r2s/
+          
+          git clone https://github.com/pymumu/smartdns.git
+          mv smartdns smartdns1
+          mv smartdns1/package/openwrt .
+          mv openwrt smartdns
+          rm -rf smartdns1
+          
+          cp -r ../../../package/luci-app-smartdns .
 
       - name: Add OpenClash
         run: |
