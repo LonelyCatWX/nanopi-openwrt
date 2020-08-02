@@ -163,6 +163,19 @@ jobs:
           mv ../../scripts/check_wan4.sh package/base-files/files/usr/bin && sed -i '/exit/i\/bin/sh /usr/bin/check_wan4.sh &' package/base-files/files/etc/rc.local
           mv ../../scripts/autoupdate.sh package/base-files/files/root/au.sh && chmod +x package/base-files/files/root/au.sh
           echo -e '\nDYC Build\n' >> package/base-files/files/etc/banner
+- name: Install Extra Packages
+        run: |
+          cd friendlywrt-rk3328/friendlywrt/package
+          
+          git clone https://github.com/rufengsuixing/luci-app-adguardhome
+          
+          git clone https://github.com/fw876/helloworld
+          mv helloworld/luci-app-ssr-plus/ .
+          rm -rf helloworld/
+          
+          git clone https://github.com/songchenwen/nanopi-r2s
+          mv nanopi-r2s/luci-app-r2sflasher/ .
+          rm -rf nanopi-r2s/
 
       - name: Add OpenClash
         run: |
@@ -199,36 +212,15 @@ jobs:
         run: |
           gzip friendlywrt-rk3328/out/*.img
       - name: Assemble Artifact
-        id: assemble_artifact
         run: |
           rm -rf ./artifact/
           mkdir -p ./artifact/
-          mv friendlywrt-rk3328/out/*img* ./artifact/
+          find friendlywrt-rk3328/out/ -name "*img*" | xargs -I{} sh -c 'f=$(basename $1); zip -r -j "./artifact/${f}.zip" $1' sh {} \;
+
           cp friendlywrt-rk3328/friendlywrt/.config ./artifact/
-          cd ./artifact/
-          md5sum *img* > md5sum.txt
-          cd ..
-          zip -r artifact.zip ./artifact/
-          #release_tag="R2S-Lean-$(date +%Y-%m-%d)-Minimal"
-          release_tag="R2S-Minimal-$(date +%Y-%m-%d)"
-          echo "##[set-output name=release_tag;]$release_tag"
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.sec_token }}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
         with:
-          tag_name: ${{ steps.assemble_artifact.outputs.release_tag }}
-          release_name: 自动发布 ${{ steps.assemble_artifact.outputs.release_tag }}
-          draft: false
-          prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.sec_token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./artifact.zip
-          asset_name: ${{ steps.assemble_artifact.outputs.release_tag }}-ROM.zip
-          asset_content_type: application/zip
+          name: FriendlyWrt_NanoPi-R2S RK3328 v19.07
+          path: ./artifact/
+
