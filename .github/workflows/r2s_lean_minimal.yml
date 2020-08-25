@@ -29,12 +29,10 @@ jobs:
           curl https://raw.githubusercontent.com/friendlyarm/build-env-on-ubuntu-bionic/master/install.sh  | sed '/#/d' | sed 's/\\//g' | sed 's/exit 0//g' | sed 's/sudo apt -y install//g' | sed 's/sudo apt-get -y install//g' | sed 's/:i386//g' | xargs sudo apt-get -y --no-install-recommends install
           docker rmi `docker images -q`
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk /usr/local/share/boost /opt/ghc
-
       - name: Install Repo
         run: |
           git clone https://github.com/friendlyarm/repo
           sudo cp repo/repo /usr/bin/
-
       - name: Init Source
         run: |
           mkdir friendlywrt-rk3328
@@ -42,11 +40,9 @@ jobs:
           repo init -u https://github.com/friendlyarm/friendlywrt_manifests -b master-v19.07.1 -m rk3328.xml --repo-url=https://github.com/friendlyarm/repo --no-clone-bundle --depth=1
           repo sync -c --no-tags --no-clone-bundle -j8
           cd friendlywrt/ && git fetch --unshallow
-
       - name: Patch Kernel
         run: |
           . patch_kernel_5.4.sh
-
       - name: Mods
         run: |
           cd friendlywrt-rk3328
@@ -78,7 +74,7 @@ jobs:
           CONFIG_PACKAGE_luci-app-adbyby-plus=y
           CONFIG_PACKAGE_luci-app-smartdns=y
           CONFIG_PACKAGE_luci-app-r2sflasher=y
-          CONFIG_PACKAGE_luci-app-adguardhome=y
+          #CONFIG_PACKAGE_luci-app-adguardhome=y
           CONFIG_PACKAGE_luci-app-ssr-plus=y
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Kcptun=y
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_DNS2SOCKS=y
@@ -92,7 +88,7 @@ jobs:
           CONFIG_PACKAGE_luci-app-uhttpd=y
           CONFIG_PACKAGE_luci-app-unblockmusic=y
           CONFIG_PACKAGE_luci-app-v2ray-server=y
-          #CONFIG_PACKAGE_luci-app-vssr=y
+          CONFIG_PACKAGE_luci-app-vssr=y
           CONFIG_PACKAGE_luci-theme-argon=y
           CONFIG_PACKAGE_luci-theme-material=y
           CONFIG_PACKAGE_luci-theme-netgear=y
@@ -101,18 +97,18 @@ jobs:
           CONFIG_UnblockNeteaseMusic_NodeJS=y
           CONFIG_PACKAGE_luci-app-passwall=y
           CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks=y
+          CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Server=y
           CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan=y
           CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
           CONFIG_PACKAGE_luci-app-passwall_INCLUDE_simple-obfs=y
           CONFIG_PACKAGE_luci-app-passwall_INCLUDE_v2ray-plugin=y
-          #CONFIG_PACKAGE_luci-app-openclash=y
+          CONFIG_PACKAGE_luci-app-openclash=y
           CONFIG_PACKAGE_luci-app-zerotier=y
           # CONFIG_PACKAGE_luci-app-accesscontrol is not set
           # CONFIG_PACKAGE_luci-app-nlbwmon is not set
           # CONFIG_PACKAGE_nlbwmon is not set
-          CONFIG_PACKAGE_luci-app-pppoe-relay=y
-          CONFIG_PACKAGE_luci-app-pppoe-server=y
+          #CONFIG_PACKAGE_luci-app-pppoe-relay=y
+          #CONFIG_PACKAGE_luci-app-pppoe-server=y
           # CONFIG_PACKAGE_luci-app-pptp-vpnserver-manyusers is not set
           # CONFIG_PACKAGE_luci-app-sqm is not set
           # CONFIG_PACKAGE_luci-app-ssr-python-pro-server is not set
@@ -128,6 +124,8 @@ jobs:
           #CONFIG_PACKAGE_luci-app-oled=y
           CONFIG_PACKAGE_luci-app-flowoffload=y
           # CONFIG_PACKAGE_luci-app-sfe is not set
+          CONFIG_DROPBEAR_ECC=y
+          CONFIG_DROPBEAR_ECC_FULL=y
           ' >> configs/config_rk3328
           cd friendlywrt
           git config --local user.email "action@github.com" && git config --local user.name "GitHub Action"
@@ -138,11 +136,9 @@ jobs:
           git commit -m 'reset'
           git checkout origin/master-v19.07.1
           git rebase adc1a9a3676b8d7be1b48b5aed185a94d8e42728^ --onto tmp -X theirs
-          curl 'https://git.openwrt.org/?p=openwrt/openwrt.git;a=patch;h=22378beb581b113def1dc392ef75306a2168a163' > ip-full.patch; git apply --reject ip-full.patch || true
           rm -f target/linux/rockchip-rk3328/patches-4.14/0001-net-thunderx-workaround-BGX-TX-Underflow-issue.patch target/linux/generic/hack-4.14/999-net-patch-linux-kernel-to-support-shortcut-fe.patch
           sed -i '/ipv6/,+3d' package/base-files/files/root/setup.sh
           git checkout upstream/lede-17.01 -- feeds.conf.default
-          #sed -i 's/packages;openwrt-19.07/packages/' feeds.conf.default
           sed -i -E 's/#(src-git.+)(helloworld.+)/\1\2/' feeds.conf.default
           cd package/lean/
           git clone https://github.com/NateLol/luci-app-oled
@@ -170,13 +166,11 @@ jobs:
           mv ../../scripts/check_wan4.sh package/base-files/files/usr/bin && sed -i '/exit/i\/bin/sh /usr/bin/check_wan4.sh &' package/base-files/files/etc/rc.local
           mv ../../scripts/autoupdate.sh package/base-files/files/root/au.sh && chmod +x package/base-files/files/root/au.sh
           echo -e '\nDYC Build\n' >> package/base-files/files/etc/banner
-
       - name: Install Extra Packages
         run: |
           cd friendlywrt-rk3328/friendlywrt/package
           
           git clone https://github.com/rufengsuixing/luci-app-adguardhome
-
           git clone https://github.com/songchenwen/nanopi-r2s
           mv nanopi-r2s/luci-app-r2sflasher/ .
           rm -rf nanopi-r2s/
@@ -188,7 +182,6 @@ jobs:
           rm -rf smartdns1
           
           cp -r ../../../package/luci-app-smartdns .
-
       - name: Add OpenClash
         run: |
           git clone -b master https://github.com/vernesong/OpenClash.git 
@@ -197,7 +190,6 @@ jobs:
           mkdir -p etc/openclash/core && cd etc/openclash/core
           curl -L https://github.com/vernesong/OpenClash/releases/download/Clash/clash-linux-armv8.tar.gz | tar zxf -
           chmod +x clash
-
       - name: Add Passwall
         run: |
           cd friendlywrt-rk3328/friendlywrt
@@ -213,13 +205,12 @@ jobs:
           rm -rf package/lean/luci-app-pptp-server
           rm -rf package/lean/luci-app-v2ray-server
           ./scripts/feeds install -a
-
       - name: Build FriendlyWrt
         run: |
           cd friendlywrt-rk3328
           sed -i 's/set -eu/set -u/' scripts/mk-friendlywrt.sh
           ./build.sh nanopi_r2s.mk
-
+          cd .. && sudo bash fix_ownership.sh
       - name: Zip Files
         run: |
           gzip friendlywrt-rk3328/out/*.img
@@ -228,11 +219,9 @@ jobs:
           rm -rf ./artifact/
           mkdir -p ./artifact/
           find friendlywrt-rk3328/out/ -name "*img*" | xargs -I{} sh -c 'f=$(basename $1); zip -r -j "./artifact/${f}.zip" $1' sh {} \;
-
           cp friendlywrt-rk3328/friendlywrt/.config ./artifact/
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
           name: FriendlyWrt_NanoPi-R2S RK3328 v19.07
           path: ./artifact/
-
