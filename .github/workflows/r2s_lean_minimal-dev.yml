@@ -92,7 +92,7 @@ jobs:
           #CONFIG_PACKAGE_luci-app-uhttpd=y
           CONFIG_PACKAGE_luci-app-unblockmusic=y
           CONFIG_PACKAGE_luci-app-v2ray-server=y
-          CONFIG_PACKAGE_luci-app-vssr=y
+          #CONFIG_PACKAGE_luci-app-vssr=y
           CONFIG_PACKAGE_luci-theme-argon=y
           #CONFIG_PACKAGE_luci-theme-material=y
           #CONFIG_PACKAGE_luci-theme-netgear=y
@@ -128,6 +128,8 @@ jobs:
           #CONFIG_PACKAGE_luci-app-oled=y
           CONFIG_PACKAGE_luci-app-flowoffload=y
           # CONFIG_PACKAGE_luci-app-sfe is not set
+          CONFIG_DROPBEAR_ECC=y
+          CONFIG_DROPBEAR_ECC_FULL=y
           ' >> configs/config_rk3328
           cd friendlywrt
           git config --local user.email "action@github.com" && git config --local user.name "GitHub Action"
@@ -204,7 +206,7 @@ jobs:
           cd friendlywrt-rk3328
           sed -i 's/set -eu/set -u/' scripts/mk-friendlywrt.sh
           ./build.sh nanopi_r2s.mk
-
+          cd .. && sudo bash fix_ownership.sh
       - name: Zip Files
         run: |
           gzip friendlywrt-rk3328/out/*.img
