@@ -85,7 +85,7 @@ jobs:
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray=y
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray_plugin=y
           #CONFIG_PACKAGE_luci-app-ssrserver-python=y
-          #CONFIG_PACKAGE_luci-app-uhttpd=y
+          CONFIG_PACKAGE_luci-app-uhttpd=y
           CONFIG_PACKAGE_luci-app-unblockmusic=y
           CONFIG_PACKAGE_luci-app-v2ray-server=y
           #CONFIG_PACKAGE_luci-app-vssr=y
@@ -122,8 +122,8 @@ jobs:
           # CONFIG_PACKAGE_libopenssl-devcrypto is not set
           # CONFIG_V2RAY_COMPRESS_UPX is not set
           #CONFIG_PACKAGE_luci-app-oled=y
-          CONFIG_PACKAGE_luci-app-flowoffload=y
-          # CONFIG_PACKAGE_luci-app-sfe is not set
+          #CONFIG_PACKAGE_luci-app-flowoffload=y
+          CONFIG_PACKAGE_luci-app-sfe=y
           CONFIG_DROPBEAR_ECC=y
           CONFIG_DROPBEAR_ECC_FULL=y
           ' >> configs/config_rk3328
